@@ -4,7 +4,8 @@ Use the Daewoo MSX2 X-2 (CPC-400) Keyboard with Korean Modern PC (via arduino pr
 # copyright
 GNU GPL
 
-# Usage : See documents at here (Korean) : https://cafe.naver.com/msx/19349
+# Usage :
+  * See documents at here (Korean) : https://cafe.naver.com/msx/19349
 
 1. prepare Daewoo MSX X-2 (CPC-400) Keyboard
   * disassemble it and remove cable (DIN 13 pin ~ Unknown 14 pin cable)
