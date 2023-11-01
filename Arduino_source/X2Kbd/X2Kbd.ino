@@ -9,18 +9,19 @@
 #include "Debug.h"
 #include "X2Keyboard.h"
 #include "Translate.h"
-#include "PCKeyboard.h"
+//#include "PCKeyboard.h"
 
 void setup() 
 {
     CX2Keyboard::GetInstance()->init();
     CTranslate::GetInstance()->init();
-    CPCKeyboard::GetInstance()->init();
+    //CPCKeyboard::GetInstance()->init();
+    PS2dev::GetInstance()->keyboard_init();
 }
 
 void loop() 
 {
     CX2Keyboard::GetInstance()->process();
     CTranslate::GetInstance()->process();
-    CPCKeyboard::GetInstance()->process();
+    //CPCKeyboard::GetInstance()->process();
 }

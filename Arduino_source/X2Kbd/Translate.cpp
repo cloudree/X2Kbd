@@ -9,7 +9,7 @@
 #include "Common.h"
 #include "Debug.h"
 #include "X2Keyboard.h"
-#include "PCKeyboard.h"
+//#include "PCKeyboard.h"
 #include "Translate.h"
 
 static CTranslate    CTranslate::m_instance;
@@ -112,12 +112,12 @@ void CTranslate::process()
         if( shifted )
         {
             DBGLN("On");
-            CPCKeyboard::GetInstance()->presskey( KEY_LEFT_SHIFT );
+            //CPCKeyboard::GetInstance()->presskey( KEY_LEFT_SHIFT );
         }
         else 
         {
             DBGLN("Off");
-            CPCKeyboard::GetInstance()->releasekey( KEY_LEFT_SHIFT );
+            //CPCKeyboard::GetInstance()->releasekey( KEY_LEFT_SHIFT );
         }
         m_oldShifted = shifted;
     }
@@ -142,24 +142,24 @@ void CTranslate::process()
             if( shifted && (last!=curr) && ( key & MOD_SHIFT_VAL ) == 0 )
             {
                 //DBGLN("On2 " + String(x) + "," + String(y) + "," + String(key,HEX) );
-                CPCKeyboard::GetInstance()->releasekey( KEY_LEFT_SHIFT );
+                //CPCKeyboard::GetInstance()->releasekey( KEY_LEFT_SHIFT );
             }
             
             if( last == 1 && curr == 0 )
             {
-                CPCKeyboard::GetInstance()->releasekey( key );
+                //CPCKeyboard::GetInstance()->releasekey( key );
             }
             else if( last == 0 && curr == 1 )
             {
                 CheckToggleCAPS( x, y );
                 CheckToggleHANGUL( x, y );
-                CPCKeyboard::GetInstance()->presskey( key );
+                //CPCKeyboard::GetInstance()->presskey( key );
             }
 
             if( shifted && (last!=curr) && ( key & MOD_SHIFT_VAL ) == 0 )
             {
                 //DBGLN("Off2 " + String(x) + "," + String(y) + "," + String(key,HEX) );
-                CPCKeyboard::GetInstance()->presskey( KEY_LEFT_SHIFT );
+                //CPCKeyboard::GetInstance()->presskey( KEY_LEFT_SHIFT );
             }
         }
         
