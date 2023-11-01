@@ -14,6 +14,10 @@
 class PS2dev
 {
 	public:
+    static PS2dev*      GetInstance()     {
+      static PS2dev m_instance(3, 2);
+      return &m_instance; 
+    }
 		PS2dev(int clk, int data);
 
 		// Enum containing all of the non-special keycodes/scancodes
