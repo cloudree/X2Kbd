@@ -173,6 +173,7 @@ void CTranslate::process()
             b >>= 1;
             
             int key = msx_keyboard_matrix[x][y];
+            DBG("<x2: row=");DBG(x);DBG("bit=");DBG(x);DBG("->key=");DBGHEXLN(key);
 #if 0
             int key = trans [shifted] [x] [y];
 #endif
@@ -181,15 +182,19 @@ void CTranslate::process()
 
             if( last == 1 && curr == 0 ) {
               if (key & PS2_PREFIX_SPECIAL) {
+                DBG("*release special:");DBGHEXLN(key & 0xff);
                 PS2dev::GetInstance()->keyboard_release_special(key & 0xff); // use lower byte
               } else {
+                DBG("*release:");DBGHEXLN(key);
                 PS2dev::GetInstance()->keyboard_release(key);
               }
             }
             else if( last == 0 && curr == 1 ) {
               if (key & PS2_PREFIX_SPECIAL) {
+                DBG("*press special:");DBGHEXLN(key & 0xff);
                 PS2dev::GetInstance()->keyboard_press_special(key & 0xff); // use lower byte
               } else {
+                DBG("*press:");DBGHEXLN(key);
                 PS2dev::GetInstance()->keyboard_press(key);
               }
             }

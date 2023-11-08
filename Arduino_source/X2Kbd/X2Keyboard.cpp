@@ -49,7 +49,8 @@ void CX2Keyboard::process()
             if( i != 7 )
                 m_readVal[ XS ] <<= 1;      // 0 MSB ... 7 LSB
         }
-        //Dump( sizeX, m_readVal );
+        DBG(">x2:");
+        Dump( sizeX, m_readVal );
     }
 }
 

@@ -9,6 +9,7 @@
 
 #include "ps2dev.h"
 
+#include "Debug.h"
 //Enable serial debug mode?
 //#define _PS2DBG Serial
 
@@ -66,6 +67,8 @@ int PS2dev::write(unsigned char data)
 
   unsigned char i;
   unsigned char parity = 1;
+
+  DBGLN(">ps2: sending=");DBGHEXLN(data);
 
 #ifdef _PS2DBG
   _PS2DBG.print(F("sending "));
@@ -127,6 +130,8 @@ int PS2dev::write(unsigned char data)
   delayMicroseconds(CLKHALF);
 
   delayMicroseconds(BYTEWAIT);
+
+  DBGLN(">ps2: sent=");DBGHEXLN(data);
 
 #ifdef _PS2DBG
   _PS2DBG.print(F("sent "));
@@ -206,6 +211,7 @@ int PS2dev::read(unsigned char * value)
 
 
   *value = data & 0x00FF;
+  DBG("<ps2: received=");DBGHEXLN(*value);
 
 #ifdef _PS2DBG
   _PS2DBG.print(F("received data "));
