@@ -9,13 +9,20 @@
 #ifndef ps2dev_h
 #define ps2dev_h
 
+#ifndef PS2_CLOCK_PIN
+#define PS2_CLOCK_PIN 3
+#endif
+#ifndef PS2_DATA_PIN
+#define PS2_DATA_PIN 2
+#endif
+
 #include "Arduino.h"
 
 class PS2dev
 {
 	public:
     static PS2dev*      GetInstance()     {
-      static PS2dev m_instance(3, 2);
+      static PS2dev m_instance(PS2_CLOCK_PIN, PS2_DATA_PIN);
       return &m_instance; 
     }
 		PS2dev(int clk, int data);
