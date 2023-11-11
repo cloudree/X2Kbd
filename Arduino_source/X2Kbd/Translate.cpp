@@ -34,8 +34,6 @@ enum Translate_Code {
 // NOTE: see with horizontal flip!
 // ps/2 keyboard send same scan code whether caps lock is on or not.
 // bypass press and release if possible!
-// TODO: Emulate PS/2 only keys
-// ex. MSX didn't have F5. How to press F5? SHIFT+F1? Then, how to press SHIFT+F5? So, we need "FN" key! When FN+F1..5 on MSX will be F5..10 on PC.
 static int msx_keyboard_matrix[sizeX][sizeY] = {
   // 0               1!                       2"                3#              4$              5%              6&                      7'
   { PS2_0,           PS2_1,                   PS2_2,            PS2_3,          PS2_4,          PS2_5,          PS2_6,                  PS2_7           },
@@ -49,8 +47,8 @@ static int msx_keyboard_matrix[sizeX][sizeY] = {
   { PS2_K,           PS2_L,                   PS2_M,            PS2_N,          PS2_O,          PS2_P,          PS2_Q,                  PS2_R           },
   // sS              tT                       uU                vV              wW              xX              yY                      zZ
   { PS2_S,           PS2_T,                   PS2_U,            PS2_V,          PS2_W,          PS2_X,          PS2_Y,                  PS2_Z           },
-  // shift?          Ctrl                     Graph             Caps            Korean          F1              F2                      F3
-  { 0,               PS2_LEFT_CTRL,           PS2_LEFT_ALT,     PS2_CAPS_LOCK,  PS2_RIGHT_ALT,  PS2_F1,         PS2_F2,                 PS2_F3          },
+  // Shift           Ctrl                     Graph             Caps            Korean          F1              F2                      F3
+  { PS2_LEFT_SHIFT,  PS2_LEFT_CTRL,           PS2_LEFT_ALT,     PS2_CAPS_LOCK,  PS2_RIGHT_ALT,  PS2_F1,         PS2_F2,                 PS2_F3          },
   // F4              F5                       Esc               Tab             Stop            Backspace       Select                  Return
   { PS2_F4,          PS2_F5,                  PS2_ESC,          PS2_TAB,        PS2_F11,        PS2_BACKSPACE,  PS2_F12,                PS2_ENTER       },
   // Space           Home                     Ins               Sup             Left            Up              Down                    Right
@@ -60,6 +58,34 @@ static int msx_keyboard_matrix[sizeX][sizeY] = {
   // 5               6                        7                 8               9               -               ,                       .
   { PS2_KP_5,        PS2_KP_6,                PS2_KP_7,         PS2_KP_8,       PS2_KP_9,       PS2_KP_MINUS,   PS2_COMMA,              PS2_PERIOD      }
 };
+// Translate MSX Shift composition keys to PS2 scan code
+// ex. MSX Shift+F1..F5 -> PS2 F6..F6 without Shift
+static int msx_keyboard_matrix_shift[sizeX][sizeY] = {
+  // 0               1!                       2"                3#              4$              5%              6&                      7'
+  { 0,               0,                       0,                0,              0,              0,              0,                      PS2_QUOTE },
+  // 8(              9)                       -=                ^~              \|              @'              [{                      ;+
+  { PS2_8,           PS2_9,                   PS2_EQUAL,        0,              0,              PS2_BACKTICK,   0,                      0         },
+  // :*              ]}                       ,<                .<              /?              N/A             aA                      bB
+  { 0,               0,                       0,                0,              0,              0,              0,                      0         },
+  // cC              dD                       eE                fF              gG              hH              iI                      jJ
+  { 0,               0,                       0,                0,              0,              0,              0,                      0         },
+  // kK              lL                       mM                nN              oO              pP              qQ                      rR
+  { 0,               0,                       0,                0,              0,              0,              0,                      0         },
+  // sS              tT                       uU                vV              wW              xX              yY                      zZ
+  { 0,               0,                       0,                0,              0,              0,              0,                      0         },
+  // Shift           Ctrl                     Graph             Caps            Korean          F1              F2                      F3
+  { 0,               0,                       0,                0,              0,              PS2_F6,         PS2_F7,                 PS2_F8    },
+  // F4              F5                       Esc               Tab             Stop            Backspace       Select                  Return
+  { PS2_F9,          PS2_F10,                 0,                0,              0,              0,              0,                      0         },
+  // Space           Home                     Ins               Sup             Left            Up              Down                    Right
+  { 0,               0,                       0,                0,              0,              0,              0,                      0         },
+  // *               +                        /                 0               1               2               3                       4
+  { 0,               0,                       0,                0,              0,              0,              0,                      0         },
+  // 5               6                        7                 8               9               -               ,                       .
+  { 0,               0,                       0,                0,              0,              0,              0,                      0         },
+};
+// TODO: MSX combination keys into PS2 multiple scan codes
+// ...
 
 #if 0
 static int trans [TRANS_MAX] [sizeX] [sizeY] = {
@@ -142,8 +168,8 @@ bool CTranslate::IsPressed( int x, int y_ )
 
 void CTranslate::process()
 {
-#if 0
     int shifted = IsPressed( shiftX, shiftY_ ) ? TRANS_SHIFT : TRANS_NORMAL;
+#if 0
     if( shifted != m_oldShifted )
     {
         if( shifted )
@@ -179,6 +205,35 @@ void CTranslate::process()
 #endif
             if( key == 0 )
                 continue;
+
+            if (shifted) {
+              int fake_key = msx_keyboard_matrix_shift[x][y];
+              if (fake_key) {
+                DBGLN("*release shift(fake)");
+                PS2dev::GetInstance()->keyboard_release(PS2_LEFT_SHIFT);
+                if( last == 1 && curr == 0 ) {
+                  if (fake_key & PS2_PREFIX_SPECIAL) {
+                    DBG("*release special(fake):");DBGHEXLN(fake_key & 0xff);
+                    PS2dev::GetInstance()->keyboard_release_special(fake_key & 0xff); // use lower byte
+                  } else {
+                    DBG("*release(fake):");DBGHEXLN(fake_key);
+                    PS2dev::GetInstance()->keyboard_release(fake_key);
+                  }
+                }
+                else if( last == 0 && curr == 1 ) {
+                  if (fake_key & PS2_PREFIX_SPECIAL) {
+                    DBG("*press special(fake):");DBGHEXLN(fake_key & 0xff);
+                    PS2dev::GetInstance()->keyboard_press_special(fake_key & 0xff); // use lower byte
+                  } else {
+                    DBG("*press(fake):");DBGHEXLN(fake_key);
+                    PS2dev::GetInstance()->keyboard_press(fake_key);
+                  }
+                }
+                DBGLN("*press shift(fake)");
+                PS2dev::GetInstance()->keyboard_press(PS2_LEFT_SHIFT);
+                continue;
+              }
+            }
 
             if( last == 1 && curr == 0 ) {
               if (key & PS2_PREFIX_SPECIAL) {
